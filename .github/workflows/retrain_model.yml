@@ -1,33 +1,72 @@
 # .github/workflows/retrain_model.yml
 name: Reentrenamiento de Modelo
+
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Semanalmente los domingos
+    - cron: '0 0 * * 0'  # Semanal, domingos
   workflow_dispatch:
+    inputs:
+      hyperparams:
+        description: 'Hiperparámetros en formato JSON (opcional)'
+        required: false
+        default: '{}'
 
 jobs:
   retrain:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Configurar Python
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configurar Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+          cache: 'pip'
+
       - name: Instalar dependencias
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r app/models/requirements.txt
+
       - name: Reentrenar modelo
-        run: python app/models/main.py --retrain
+        run: |
+          python app/models/train.py \
+            --data-path data/membership_groceries_userprofile.csv \
+            --output-path models/grocery_membership_model.joblib
         env:
-          API_KEY: ${{ secrets.API_KEY }}
-      - name: Construir y publicar imagen Docker
-        uses: docker/build-push-action@v4
+          # Variables de entorno críticas
+          PYTHONPATH: ${{ github.workspace }}
+          HYPERPARAMS: ${{ github.event.inputs.hyperparams }}
+
+      - name: Registrar modelo
+        run: |
+          python -c "
+          import sys, os
+          sys.path.append('${{ github.workspace }}')
+          from app.models.versioning import ModelRegistry
+          import json
+          
+          # Cargar métricas del último entrenamiento
+          with open('training_metrics.json', 'r') as f:
+              metrics = json.load(f)
+          
+          # Registrar modelo en sistema de versionado
+          registry = ModelRegistry()
+          model_id = registry.register_model(
+              model_path='models/grocery_membership_model.joblib',
+              metrics=metrics['metrics'],
+              hyperparams=metrics['hyperparameters'],
+              feature_importance=metrics['feature_importance'],
+              tags={'source': 'github_action', 'workflow': 'retrain_model'}
+          )
+          print(f'Modelo registrado con ID: {model_id}')
+          "
+
+      - name: Subir modelo como artefacto
+        uses: actions/upload-artifact@v3
         with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/grocery-membership:latest
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          name: trained-model
+          path: |
+            models/grocery_membership_model.joblib
+            training_metrics.json

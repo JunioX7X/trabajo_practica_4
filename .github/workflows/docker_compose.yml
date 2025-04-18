@@ -10,7 +10,7 @@ services:
         - API_KEY=${API_KEY}
     environment:
       - SERVICE_TYPE=api
-      - MODEL_PATH=/app/models/grocery_membership_model.joblib
+      - MODEL_PATH=/data/membership_groceries_userprofile.csv
       - API_KEY=${API_KEY}
     ports:
       - "8000:8000"
