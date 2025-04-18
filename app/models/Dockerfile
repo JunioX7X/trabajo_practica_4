@@ -4,12 +4,12 @@ FROM python:3.10-slim AS development
 WORKDIR /app
 
 # Copiar solo los archivos de requisitos primero para aprovechar caché de capas
-COPY app/models/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar código de aplicación
-COPY app ./app
-COPY data ./data
+COPY .. ./app
+COPY ../../data ./data
 
 # Asegurar existencia del directorio de modelos
 RUN mkdir -p models
@@ -23,8 +23,7 @@ ENV PYTHONPATH=/app
 # Etapa de producción
 FROM development AS production
 
-# Copiar modelo pre-entrenado si existe
-COPY models/*.joblib models/
+
 
 # Establecer variables específicas de producción
 ENV MODEL_PATH=/app/models/grocery_membership_model.joblib \
