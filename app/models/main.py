@@ -7,7 +7,7 @@ from app.schemas import MemberFeatures, PredictionResponse
 import pandas as pd
 
 app = FastAPI(title="API de Predicción de Membresías de Supermercado")
-model_path = os.getenv("MODEL_PATH", "models/grocery_membership_model.joblib")
+model_path = os.getenv("membership_groceries_userprofile.csv")
 model = joblib.load(model_path)
 
 API_KEY_NAME = "X-API-Key"

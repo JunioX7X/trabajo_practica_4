@@ -1,0 +1,41 @@
+# Crear docker-compose.yml
+
+
+services:
+  api:
+    build:
+      context: .
+      target: production
+      args:
+        - API_KEY=${API_KEY}
+    environment:
+      - SERVICE_TYPE=api
+      - MODEL_PATH=/app/models/grocery_membership_model.joblib
+      - API_KEY=${API_KEY}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  streamlit:
+    build:
+      context: .
+      target: production
+      args:
+        - API_KEY=${API_KEY}
+    environment:
+      - SERVICE_TYPE=streamlit
+      - MODEL_PATH=/app/models/grocery_membership_model.joblib
+      - API_KEY=${API_KEY}
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    volumes:
+      - ./models:/app/models
