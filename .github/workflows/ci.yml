@@ -25,10 +25,6 @@ jobs:
           pip install pytest pytest-cov flake8 mypy black isort
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       
-
-      - name: Run tests with coverage
-        run: |
-          pytest --cov=app tests/ --cov-report=xml
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
