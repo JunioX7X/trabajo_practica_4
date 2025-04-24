@@ -4,7 +4,7 @@ FROM python:3.10-slim AS development
 WORKDIR /app
 
 # Copiar requirements e instalar dependencias
-COPY requirements.txt .
+COPY ../../requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar código de la app (incluyendo scripts de entrenamiento)
