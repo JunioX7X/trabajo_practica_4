@@ -5,6 +5,8 @@ import joblib
 import os
 import pandas as pd
 from app.models.schemas import MembershipPredictorFeatures, PredictionResponse
+from app.models.train import train_model  # Ajusta la ruta según tu estructura
+model = train_model()
 
 app = FastAPI(title="API de Predicción de Membresías de Supermercado")
 

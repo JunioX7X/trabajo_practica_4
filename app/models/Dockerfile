@@ -3,31 +3,26 @@ FROM python:3.10-slim AS development
 
 WORKDIR /app
 
-# Copiar solo los archivos de requisitos primero para aprovechar caché de capas
-COPY requirements.txt ./requirements.txt
+# Copiar requirements e instalar dependencias
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar código de aplicación
-COPY .. ./app
-COPY ../../data ./data
+# Copiar código de la app (incluyendo scripts de entrenamiento)
+COPY app ./app
+COPY data ./data
 
-# Asegurar existencia del directorio de modelos
+# Crear directorio para modelos (si es necesario)
 RUN mkdir -p models
 
-# Exponer puerto para API
+# Exponer puerto
 EXPOSE 8000
 
-# Establecer variable de entorno para Python path
-ENV PYTHONPATH=/app
-
-# Etapa de producción
-FROM development AS production
-
-
-
-# Establecer variables específicas de producción
-ENV MODEL_PATH=/app/models/grocery_membership_model.joblib \
+# Variables de entorno
+ENV PYTHONPATH=/app \
     DATA_PATH=/app/data/membership_groceries_userprofile.csv
 
-# Punto de entrada para servicio de API
+# Etapa de producción (aquí podrías entrenar el modelo si es necesario)
+FROM development AS production
+
+# Comando para iniciar la API
 CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

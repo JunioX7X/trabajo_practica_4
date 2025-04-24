@@ -24,7 +24,15 @@ def train_model(data_path: str, output_path: str, hyperparams: dict = None):
 
     Returns:
         dict: Métricas de rendimiento y metadatos del modelo
+
     """
+
+    data = pd.read_csv("/app/data/membership_groceries_userprofile.csv")
+    X = data.drop(columns=["target_column"])
+    y = data["target_column"]
+    model = RandomForestClassifier()
+    model.fit(X, y)
+    joblib.dump(model, "/app/models/model.joblib")
     logger.info(f"Iniciando entrenamiento con datos desde: {data_path}")
 
     # Crear directorio de salida si no existe
