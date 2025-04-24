@@ -19,7 +19,7 @@ EXPOSE 8000
 
 # Variables de entorno
 ENV PYTHONPATH=/app \
-    DATA_PATH=/app/data/membership_groceries_userprofile.csv
+    DATA_PATH=/app/data/models/membership_groceries_userprofile.csv
 
 # Etapa de producción (aquí podrías entrenar el modelo si es necesario)
 FROM development AS production
