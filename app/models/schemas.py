@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional, Union, Any
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, validator, model_validator
 from enum import Enum
 import numpy as np
 import datetime
@@ -25,7 +25,7 @@ class ModelMetadata(BaseModel):
     hyperparameters: Dict[str, Any]
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "model_id": "model_20240418_a1b2c3",
                 "created_at": "2024-04-18T10:30:00Z",
@@ -61,14 +61,14 @@ class MembershipPredictorFeatures(BaseModel):
             raise ValueError("Unusually high basket value detected")
         return v
 
-    @root_validator
+    @model_validator(mode="after")
     def validate_activity_metrics(cls, values):
         if values.get('months_active', 0) > 0 and values.get('shopping_frequency', 0) == 0:
             raise ValueError("Invalid activity pattern: active months with zero shopping frequency")
         return values
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "age": 35,
                 "income": 65000.0,
@@ -96,7 +96,7 @@ class PredictionResponse(BaseModel):
     def validate_probabilities(cls, v):
         return round(float(v), 4)  # Ensure consistent decimal precision
 
-    @root_validator
+    @model_validator(mode="after")
     def validate_probability_sum(cls, values):
         p_yes = values.get('probability_yes', 0)
         p_no = values.get('probability_no', 0)
@@ -105,7 +105,7 @@ class PredictionResponse(BaseModel):
         return values
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "auto_renew_prediction": 1,
                 "probability_yes": 0.8763,
@@ -148,14 +148,14 @@ class ModelDeploymentConfig(BaseModel):
     """Schema for model deployment configuration."""
     model_path: str
     version: str
-    environment: str = Field(..., regex='^(development|staging|production)$')
+    environment: str = Field(..., pattern='^(development|staging|production)$')
     replicas: int = Field(1, ge=1, le=10)
     resources: Dict[str, Dict[str, str]]
     autoscaling_enabled: bool = False
     monitoring_enabled: bool = True
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "model_path": "/app/models/grocery_membership_model.joblib",
                 "version": "v1.2.3",
@@ -181,7 +181,7 @@ class PredictionMonitoringEvent(BaseModel):
     timestamp: datetime.datetime = Field(default_factory=datetime.datetime.now)
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "prediction": {
                     "auto_renew_prediction": 1,

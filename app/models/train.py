@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import joblib
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier  # Ajustar según algoritmo preferido
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import logging
@@ -24,15 +24,8 @@ def train_model(data_path: str, output_path: str, hyperparams: dict = None):
 
     Returns:
         dict: Métricas de rendimiento y metadatos del modelo
-
     """
 
-    data = pd.read_csv("/app/data/membership_groceries_userprofile.csv")
-    X = data.drop(columns=["target_column"])
-    y = data["target_column"]
-    model = RandomForestClassifier()
-    model.fit(X, y)
-    joblib.dump(model, "/app/models/model.joblib")
     logger.info(f"Iniciando entrenamiento con datos desde: {data_path}")
 
     # Crear directorio de salida si no existe
@@ -42,10 +35,14 @@ def train_model(data_path: str, output_path: str, hyperparams: dict = None):
     df = pd.read_csv(data_path)
     logger.info(f"Dataset cargado: {df.shape[0]} registros, {df.shape[1]} características")
 
-    # Preprocesamiento básico
-    # Ajustar según tu esquema específico de datos
-    X = df.drop('target_column', axis=1)  # Ajustar al nombre real de tu columna objetivo
-    y = df['target_column']
+    TARGET_COL = "membership_auto_renew"
+
+    # Preprocesamiento
+    X = df.drop(TARGET_COL, axis=1)
+    y = df[TARGET_COL]
+
+    # Codificación de variables categóricas
+    X = pd.get_dummies(X)
 
     # Split de datos
     X_train, X_test, y_train, y_test = train_test_split(
