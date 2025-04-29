@@ -4,7 +4,6 @@ from enum import Enum
 import numpy as np
 import datetime
 
-
 class FeatureImportance(BaseModel):
     """Schema for feature importance metadata."""
     feature_name: str

@@ -4,7 +4,7 @@ FROM python:3.10-slim AS development
 WORKDIR /app
 
 # Copiar requirements e instalar dependencias
-COPY ../../requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar código de la app (incluyendo scripts de entrenamiento)
@@ -25,4 +25,4 @@ ENV PYTHONPATH=/app \
 FROM development AS production
 
 # Comando para iniciar la API
-CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.models.main:app", "--host", "0.0.0.0", "--port", "8000"]
