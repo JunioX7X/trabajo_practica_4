@@ -8,8 +8,12 @@ from app.models.schemas import MembershipPredictorFeatures, PredictionResponse
 from app.models.train import train_model  # Ajusta la ruta según tu estructura
 
 
-DATA_PATH = "data/membership_groceries_userprofile.csv"
-MODEL_OUTPUT_PATH = "models/membership_model.joblib"
+
+
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Sube dos niveles desde models/
+DATA_PATH = os.path.join(ROOT_DIR, "data", "membership_groceries_userprofile.csv")
+MODEL_OUTPUT_PATH = os.path.join(ROOT_DIR, "app", "models", "grocery_membership_model.joblib")
 
 model = train_model(DATA_PATH, MODEL_OUTPUT_PATH)
 
