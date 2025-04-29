@@ -47,7 +47,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./app/models/Dockerfile
+          file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/grocery-membership:latest,${{ secrets.DOCKER_USERNAME }}/grocery-membership:${{ github.sha }}
           build-args: |
