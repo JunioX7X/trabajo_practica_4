@@ -11,6 +11,13 @@ class ModelRegistry:
         self.metadata_path = os.path.join(registry_dir, "metadata.json")
         self._load_metadata()
 
+    def get_model_version(self, model_id: str) -> Optional[str]:
+        model = self.get_model_by_id(model_id)
+        if model:
+            return model.get("version")
+        return None
+
+
     def _load_metadata(self):
         if os.path.exists(self.metadata_path):
             with open(self.metadata_path, 'r') as f:
@@ -74,3 +81,12 @@ class ModelRegistry:
             self._save_metadata()
             return True
         return False
+if __name__ == "__main__":
+    registry = ModelRegistry()
+    model_id = "model_2"  # Cambia según necesites
+    version = registry.get_model_version(model_id)
+
+    if version:
+        print(f"La versión del modelo '{model_id}' es: {version}")
+    else:
+        print("Modelo no encontrado.")
