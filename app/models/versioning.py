@@ -83,7 +83,7 @@ class ModelRegistry:
         return False
 if __name__ == "__main__":
     registry = ModelRegistry()
-    model_id = "model_2"  # Cambia según necesites
+    model_id = "membership_model.joblib"
     version = registry.get_model_version(model_id)
 
     if version:
