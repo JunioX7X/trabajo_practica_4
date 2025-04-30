@@ -1,8 +1,7 @@
-# model_registry/versioning.py
 import os
 import json
 import datetime
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 
 
 class ModelRegistry:
@@ -19,21 +18,59 @@ class ModelRegistry:
         else:
             self.metadata = {"models": []}
 
+    def _save_metadata(self):
+        with open(self.metadata_path, 'w') as f:
+            json.dump(self.metadata, f, indent=2)
+
     def register_model(self, model_path: str, metrics: Dict[str, Any],
-                       tags: Dict[str, str] = None):
+                       version: str = None, tags: Dict[str, str] = None,
+                       status: str = "registered") -> str:
         model_id = f"model_{len(self.metadata['models']) + 1}"
+        version = version or f"1.0.{len(self.metadata['models'])}"
         model_info = {
             "id": model_id,
             "path": model_path,
             "metrics": metrics,
+            "version": version,
             "tags": tags or {},
             "created_at": datetime.datetime.now().isoformat(),
-            "status": "registered"
+            "status": status
         }
         self.metadata["models"].append(model_info)
         self._save_metadata()
         return model_id
 
-    def _save_metadata(self):
-        with open(self.metadata_path, 'w') as f:
-            json.dump(self.metadata, f, indent=2)
+    def get_model_by_id(self, model_id: str) -> Optional[Dict[str, Any]]:
+        for model in self.metadata["models"]:
+            if model["id"] == model_id:
+                return model
+        return None
+
+    def list_models(self, status: str = None) -> List[Dict[str, Any]]:
+        if status:
+            return [m for m in self.metadata["models"] if m["status"] == status]
+        return self.metadata["models"]
+
+    def get_latest_model(self) -> Optional[Dict[str, Any]]:
+        if not self.metadata["models"]:
+            return None
+        return self.metadata["models"][-1]
+
+    def set_model_status(self, model_id: str, status: str) -> bool:
+        model = self.get_model_by_id(model_id)
+        if model:
+            model["status"] = status
+            self._save_metadata()
+            return True
+        return False
+
+    def rollback_model(self, target_model_id: str) -> bool:
+        model = self.get_model_by_id(target_model_id)
+        if model:
+            for m in self.metadata["models"]:
+                if m["status"] == "production":
+                    m["status"] = "archived"
+            model["status"] = "production"
+            self._save_metadata()
+            return True
+        return False
