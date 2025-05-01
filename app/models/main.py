@@ -39,6 +39,9 @@ async def predict(features: MembershipPredictorFeatures, api_key: str = Depends(
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0].max()
 
+    if prediction == 0:
+        prediction = "No Membresía"
+
     return {
         "prediction": str(prediction),
         "probability": float(probability)

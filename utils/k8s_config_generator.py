@@ -29,5 +29,5 @@ def generate_deployment_manifests(config: ModelDeploymentConfig) -> dict:
             }
         }
     }
-
+#:)
     return deployment
