@@ -67,6 +67,8 @@ Este proyecto utiliza un modelo de **machine learning** cuyo objetivo es **prede
 3. **Instalar dependencias**
    ```bash
    pip install --no-cache-dir -r requirements.txt
+
+4. **Al entrar al link de la API , presionar el boton de AUTHORIZE y la contraseña seria "miclave123"
    ```
 
 ## Conjunto de Datos
