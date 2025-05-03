@@ -82,9 +82,12 @@ class MembershipPredictorFeatures(BaseModel):
         }
 
 
+from pydantic import BaseModel, Field, validator, model_validator
+import numpy as np
+import datetime
+
 class PredictionResponse(BaseModel):
-    """Response schema for membership renewal prediction."""
-    auto_renew_prediction: int = Field(..., description="Binary prediction: 1=renewal, 0=no renewal")
+    auto_renew_prediction: bool = Field(..., description="Binary prediction: 1=renewal, 0=no renewal")
     probability_yes: float = Field(..., ge=0.0, le=1.0, description="Probability of renewal")
     probability_no: float = Field(..., ge=0.0, le=1.0, description="Probability of non-renewal")
     model_version: str = Field(..., description="Version ID of model used for prediction")
@@ -93,12 +96,12 @@ class PredictionResponse(BaseModel):
 
     @validator('probability_yes', 'probability_no')
     def validate_probabilities(cls, v):
-        return round(float(v), 4)  # Ensure consistent decimal precision
+        return round(float(v), 4)
 
     @model_validator(mode="after")
     def validate_probability_sum(cls, values):
-        p_yes = values.get('probability_yes', 0)
-        p_no = values.get('probability_no', 0)
+        p_yes = getattr(values, 'probability_yes', 0)
+        p_no = getattr(values, 'probability_no', 0)
         if not np.isclose(p_yes + p_no, 1.0, atol=1e-5):
             raise ValueError("Probabilities must sum to 1.0")
         return values
@@ -114,6 +117,7 @@ class PredictionResponse(BaseModel):
                 "prediction_timestamp": "2024-04-18T14:25:36Z"
             }
         }
+
 
 
 class BatchPredictionRequest(BaseModel):

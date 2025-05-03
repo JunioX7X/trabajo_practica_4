@@ -12,12 +12,15 @@ COPY app ./app
 COPY data ./data
 
 # Crear directorio para modelos
-RUN mkdir -p app/models
+RUN mkdir -p models
 
 # ENTRENAR EL MODELO durante el build
 RUN python app/models/train.py \
     --data-path data/membership_groceries_userprofile.csv \
-    --output-path app/models/grocery_membership_model.joblib
+    --output-path /app/models/grocery_membership_model.joblib
+
+RUN ls -lh /app/models/
+
 
 # Exponer puerto
 EXPOSE 8000

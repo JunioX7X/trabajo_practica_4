@@ -1,5 +1,6 @@
 # app/models/train.py
 import os
+import json
 import pandas as pd
 import joblib
 from sklearn.model_selection import train_test_split
@@ -92,6 +93,11 @@ def train_model(data_path: str, output_path: str, hyperparams: dict = None):
     }
 
     logger.info("Proceso de entrenamiento finalizado exitosamente")
+    # Guardar columnas utilizadas para entrenamiento
+    columns_path = output_path.replace(".joblib", "_columns.json")
+    with open(columns_path, "w") as f:
+        json.dump(model_info["feature_names"], f)
+
     return model_info
 
 
@@ -104,4 +110,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     train_model(args.data_path, args.output_path)
+    # Guardar columnas usadas para entrenar el modelo
+
 
