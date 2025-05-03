@@ -1,216 +1,220 @@
-# proyecto_final_mlops
-```markdown
 # API de Predicción de Renovación Automática de Membresías de Supermercado
 
-Este repositorio alberga un servicio basado en **FastAPI** y una serie de utilidades para **entrenar**, **versionar** y **desplegar** un modelo de **machine learning** que predice si un cliente renovará automáticamente su membresía de supermercado.
+![Versión](https://img.shields.io/badge/versión-1.0.0-blue)
+![Python](https://img.shields.io/badge/Python-3.10-green)
+![FastAPI](https://img.shields.io/badge/FastAPI-latest-teal)
+![Licencia](https://img.shields.io/badge/licencia-MIT-yellow)
 
-## Tabla de Contenidos
+Una API de aprendizaje automático para predecir la probabilidad de renovación automática de membresías de clientes de supermercado, basada en características del perfil de usuario y su comportamiento de compra.
 
-- [Descripción del Proyecto](#descripción-del-proyecto)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Prerrequisitos](#prerrequisitos)
+## 📋 Contenido
+
+- [Descripción General](#descripción-general)
+- [Arquitectura](#arquitectura)
+- [Características](#características)
+- [Requisitos](#requisitos)
 - [Instalación](#instalación)
-- [Conjunto de Datos](#conjunto-de-datos)
-- [Preprocesamiento y Limpieza](#preprocesamiento-y-limpieza)
-- [Entrenamiento del Modelo (paso a paso)](#entrenamiento-del-modelo-paso-a-paso)
-- [Registro y Versionado de Modelo](#registro-y-versionado-de-modelo)
-- [Servicio API y Uso](#servicio-api-y-uso)
-- [Configuración de Variables de Entorno](#configuración-de-variables-de-entorno)
-- [Despliegue en Kubernetes](#despliegue-en-kubernetes)
-- [Modo Desarrollo vs Producción](#modo-desarrollo-vs-producción)
-- [Contribuciones](#contribuciones)
+- [Uso](#uso)
+  - [API REST](#api-rest)
+  - [Interfaz Streamlit](#interfaz-streamlit)
+- [Modelo de ML](#modelo-de-ml)
+- [Despliegue](#despliegue)
+- [CI/CD](#cicd)
+- [Monitoreo](#monitoreo)
+- [Contribuir](#contribuir)
 
-## Descripción del Proyecto
+## 📝 Descripción General
 
-Este proyecto utiliza un modelo de **machine learning** cuyo objetivo es **predecir si un cliente renovará automáticamente su membresía de supermercado en su próxima facturación**. Para ello, el modelo calcula una probabilidad de renovación y emite una predicción binaria (0 = no renovará, 1 = renovará). Con esta información, las tiendas pueden anticipar el comportamiento de sus usuarios y diseñar campañas de retención más efectivas.
+Este proyecto proporciona una API para predecir si un cliente renovará automáticamente su membresía de supermercado, basándose en datos históricos de comportamiento y características demográficas. El sistema implementa un modelo de Machine Learning entrenado con datos de usuarios y está diseñado para integrarse fácilmente con aplicaciones existentes mediante una API REST.
 
-## Estructura del Proyecto
+## 🏗️ Arquitectura
+
+El sistema está compuesto por los siguientes componentes:
+
+1. **API REST**: Endpoint para realizar predicciones individuales y por lotes
+2. **Modelo de ML**: Modelo de Random Forest entrenado para predecir renovaciones
+3. **Interfaz Streamlit**: Dashboard para interactuar con el modelo
+4. **Infraestructura**: Despliegue con Docker y Kubernetes
+5. **CI/CD**: Automatización de pruebas, entrenamiento y despliegue
+
+## ✨ Características
+
+- Predicción de renovación con probabilidades
+- Seguridad mediante API Key
+- Procesamiento de solicitudes individuales y por lotes
+- Interfaz visual para pruebas mediante Streamlit
+- Reentrenamiento automático periódico
+- Monitoreo de rendimiento del modelo
+- Despliegue automatizado con Docker y Kubernetes
+- Versión de modelos y registro de métricas
+
+## 📦 Requisitos
 
 ```
-├── app
-│   ├── api
-│   │   └── main.py                # Punto de entrada de la API FastAPI
-│   └── models
-│       ├── schemas.py            # Definición de modelos Pydantic para validación de inputs/outputs
-│       ├── train.py              # Script de entrenamiento del modelo
-│       ├── versioning.py         # Lógica de registro/versionado de modelos
-│       └── membership_model.joblib  # (Generado) modelo serializado
-├── data
-│   └── membership_groceries_userprofile.csv  # Dataset de perfiles de clientes
-├── utils
-│   └── k8s_config_generator.py  # Generador de manifiestos de Kubernetes
-├── Dockerfile                   # Definición de imagen Docker multi-stage
-├── requirements.txt             # Dependencias Python
-└── README.md                    # Documentación del proyecto (este archivo)
+pandas
+scikit-learn
+pyyaml
+fastapi
+uvicorn
+joblib
+pydantic
 ```
 
-## Prerrequisitos
+## 🚀 Instalación
 
-- Python 3.10 o superior
-- pip (`pip install --upgrade pip`)
-- Docker (opcional, para contenerización)
-- Acceso a la base de datos o CSV con perfiles de usuarios
-
-## Instalación
-
-1. **Clonar el repositorio**
+1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/JunioX7X/trabajo_practica_4.git
-   cd trabajo_practica_4
+   git clone https://github.com/usuario/grocery-membership-predictor.git
+   cd grocery-membership-predictor
    ```
-2. **Crear y activar un entorno virtual**
+
+2. Crear entorno virtual (opcional):
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate   # Windows
+   python -m venv venv
+   source venv/bin/activate  # En Windows: venv\Scripts\activate
    ```
-3. **Instalar dependencias**
+
+3. Instalar dependencias:
    ```bash
-   pip install --no-cache-dir -r requirements.txt
-
-4. **Al entrar al link de la API , presionar el boton de AUTHORIZE y la contraseña seria "miclave123"
+   pip install -r requirements.txt
    ```
 
-## Conjunto de Datos
-
-- El CSV de entrada debe ubicarse en `data/membership_groceries_userprofile.csv`.
-- Columnas esperadas (entre otras):
-  - `age` (edad)
-  - `income` (ingresos anuales)
-  - `shopping_frequency` (veces de compra por mes)
-  - `avg_basket_value` (valor promedio del carrito)
-  - `months_active` (meses de antigüedad)
-  - `previous_renewals` (renovaciones previas)
-  - `product_categories_purchased` (cantidad de categorías compradas)
-  - `has_returned_items` (booleano: devoluciones previas)
-  - `distance_to_store` (km al supermercado)
-  - `membership_auto_renew` (target: 1 = renovó, 0 = no renovó)
-
-## Preprocesamiento y Limpieza
-
-1. **Carga de datos**: se lee el CSV con pandas.
-2. **Tratamiento de valores faltantes**: imputación de medias para numéricos y moda para categóricos.
-3. **Codificación**: una codificación one-hot para variables categóricas (p.ej., `has_returned_items`).
-4. **Escalado**: normalización de características numéricas con `StandardScaler`.
-
-## Entrenamiento del Modelo (paso a paso)
-
-1. **Separación de características y target**:
-   ```python
-   X = df.drop("membership_auto_renew", axis=1)
-   y = df["membership_auto_renew"]
-   ```
-2. **División entrenamiento/prueba**:
-   - 80% datos para entrenamiento
-   - 20% datos para validación
-3. **Pipeline de preprocesamiento**:
-   - `ColumnTransformer` con ramas para numéricos y categóricos
-   - `StandardScaler` + `OneHotEncoder`
-4. **Modelo**:
-   - `RandomForestClassifier`
-   - Hiperparámetros por defecto: 100 árboles, profundidad máxima 10
-   - Se pueden modificar con flags al script `train.py`
-5. **Entrenamiento**:
+4. Configurar variables de entorno:
    ```bash
-   python app/models/train.py \
-     --data-path data/membership_groceries_userprofile.csv \
-     --output-path app/models/membership_model.joblib
-   ```
-6. **Evaluación**:
-   - Métricas: precisión, recall, F1-score, AUC-ROC
-   - Se imprimen en consola al finalizar
-7. **Serialización**:
-   - El pipeline completo (preprocesamiento + modelo) se guarda con `joblib`
-
-## Registro y Versionado de Modelo
-
-El archivo `versioning.py` implementa un registro sencillo que:
-1. Comprueba si ya existe un modelo con la versión indicada.
-2. Mueve el modelo anterior a un subdirectorio `archive/` con timestamp.
-3. Guarda la nueva versión en la ruta definida.
-
-## Servicio API y Uso
-
-1. **Arrancar el servidor**:
-   ```bash
-   export MODEL_PATH=app/models/membership_model.joblib
-   export API_KEY=<tu_api_key_secreto>
-   uvicorn app.api.main:app --host 0.0.0.0 --port 8000
-   ```
-2. **Endpoint**: `POST /predict`
-3. **Cabeceras**:
-   - `X-API-Key: <tu_api_key>`
-4. **Cuerpo (JSON)**: debe seguir el esquema `MembershipPredictorFeatures` en `schemas.py`.
-5. **Respuesta**:
-   ```json
-   {
-     "prediction": 1,
-     "probability": { "renew": 0.87, "no_renew": 0.13 }
-   }
+   export API_KEY="tu_clave_secreta"  # En Windows: set API_KEY=tu_clave_secreta
    ```
 
-### Ejemplo de petición
+## 💻 Uso
+
+### API REST
+
+La API está construida con FastAPI y expone los siguientes endpoints:
+
+#### Predicción Individual
+
+```http
+POST /predict
+```
+
+Cuerpo de la solicitud (JSON):
+
+```json
+{
+  "gender": "male",
+  "shared_account": true,
+  "membership_tier": "silver",
+  "membership_fee": 29.99,
+  "push_notification_enabled": true,
+  "have_app": true,
+  "app_engagement_score": 65.5,
+  "bought_store_brand": false,
+  "promotion_participation_count": 3,
+  "average_basket_size": 55.2,
+  "use_count": 18,
+  "reward_points_used": 200.0
+}
+```
+
+Respuesta:
+
+```json
+{
+  "auto_renew_prediction": 1,
+  "probability_yes": 0.8763,
+  "probability_no": 0.1237,
+  "model_version": "v1.0.0",
+  "prediction_id": "pred_f7g8h9",
+  "prediction_timestamp": "2024-04-18T14:25:36Z"
+}
+```
+
+#### Iniciar el Servidor
 
 ```bash
-curl -X POST http://localhost:8000/predict \
-  -H "X-API-Key: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "age": 40,
-    "income": 50000,
-    "shopping_frequency": 10,
-    "avg_basket_value": 80.5,
-    "months_active": 12,
-    "previous_renewals": 1,
-    "product_categories_purchased": 5,
-    "has_returned_items": false,
-    "distance_to_store": 3.2
-  }'
+uvicorn app.api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## Configuración de Variables de Entorno
+### Interfaz Streamlit
 
-- `MODEL_PATH`: ruta al archivo `.joblib` del modelo.
-- `API_KEY`: clave secreta para autenticar peticiones.
+La aplicación incluye una interfaz web construida con Streamlit para facilitar las pruebas:
 
-## Despliegue en Kubernetes
-
-Utiliza el generador de manifiestos en `utils/k8s_config_generator.py`:
-
-```python
-from utils.k8s_config_generator import generate_deployment_manifests
-from app.models.schemas import ModelDeploymentConfig
-
-config = ModelDeploymentConfig(
-    model_path="/app/models/membership_model.joblib",
-    version="v1.0.0",
-    environment="production",
-    replicas=3,
-    resources={
-        "requests": {"cpu": "500m", "memory": "512Mi"},
-        "limits": {"cpu": "1", "memory": "1Gi"}
-    },
-    autoscaling_enabled=True,
-    monitoring_enabled=True
-)
-manifests = generate_deployment_manifests(config)
-print(manifests)
+```bash
+streamlit run app/streamlit/app.py
 ```
 
-## Modo Desarrollo vs Producción
+La interfaz estará disponible en http://localhost:8501.
 
-- **Desarrollo**: montado en vivo, logs detallados, recarga automática (Hot reload).
-- **Producción**: construido en Docker multi-stage, sin código fuente en la imagen final, solo ejecuta Uvicorn.
+## 🧠 Modelo de ML
 
-## Contribuciones
+El sistema utiliza un modelo de Random Forest Classifier entrenado con datos históricos de renovaciones de membresías:
 
-¡Se valoran las mejoras! Para contribuir:
-1. Abre un *issue* describiendo tu propuesta.
-2. Realiza un *fork* y crea una rama nueva.
-3. Envía un *pull request* con tu implementación.
+- **Características de entrada**: Información demográfica, comportamiento de compra y uso de la app
+- **Preprocesamiento**: Normalización de variables numéricas y codificación one-hot para categóricas
+- **Pipeline**: Transformación + clasificación en un pipeline unificado
+- **Métricas**: Precisión, recall, F1-score y AUC
+
+Para reentrenar el modelo:
+
+```bash
+python app/models/train.py --data-path data/membership_groceries_userprofile.csv --output-path models/grocery_membership_model.joblib
+```
+
+## 🚢 Despliegue
+
+### Docker Compose (Desarrollo)
+
+```bash
+docker-compose up -d
+```
+
+### Kubernetes (Producción)
+
+El proyecto incluye configuraciones para desplegar en Kubernetes:
+
+```bash
+# Generar manifiestos
+python utils/k8s_config_generator.py > k8s-deployment.yaml
+
+# Aplicar configuración
+kubectl apply -f k8s-deployment.yaml
+```
+
+## 🔄 CI/CD
+
+El proyecto utiliza GitHub Actions para:
+
+- **Integración Continua**: Pruebas automáticas en cada PR
+- **Entrenamiento Periódico**: Reentrenamiento semanal del modelo
+- **Despliegue Continuo**: Actualización automática en los entornos
+
+### Flujos de trabajo
+
+1. **CI**: Ejecuta pruebas en cada PR hacia main
+2. **Reentrenamiento**: Actualiza el modelo semanalmente
+3. **Despliegue**: Construye y despliega la imagen Docker
+
+## 📊 Monitoreo
+
+El sistema incluye monitoreo de:
+
+- Rendimiento del modelo en producción
+- Latencia de las predicciones  
+- Distribución de datos de entrada
+- Alertas de degradación de rendimiento
+
+## 🤝 Contribuir
+
+1. Haz un fork del repositorio
+2. Crea una rama para tu característica (`git checkout -b feature/nueva-funcionalidad`)
+3. Haz commit de tus cambios (`git commit -m 'Añade nueva funcionalidad'`)
+4. Sube la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
 
 ---
 
-**Autores**: Junios Ramirez, Jasser Palacios, Jason Barrantes
-```
+## INTEGRANTES:
+Junior Ramirez 
+Jasser Palacios
+Jason Barramtes
+- 
 
