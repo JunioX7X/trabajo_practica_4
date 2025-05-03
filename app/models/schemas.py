@@ -62,7 +62,7 @@ class MembershipPredictorFeatures(BaseModel):
 
     @model_validator(mode="after")
     def validate_activity_metrics(cls, values):
-        if values.get('months_active', 0) > 0 and values.get('shopping_frequency', 0) == 0:
+        if values.months_active > 0 and values.shopping_frequency == 0:
             raise ValueError("Invalid activity pattern: active months with zero shopping frequency")
         return values
 

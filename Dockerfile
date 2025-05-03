@@ -7,22 +7,26 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar código de la app (incluyendo scripts de entrenamiento)
+# Copiar código de la app y datos
 COPY app ./app
 COPY data ./data
 
-# Crear directorio para modelos (si es necesario)
-RUN mkdir -p models
+# Crear directorio para modelos
+RUN mkdir -p app/models
+
+# ENTRENAR EL MODELO durante el build
+RUN python app/models/train.py \
+    --data-path data/membership_groceries_userprofile.csv \
+    --output-path app/models/grocery_membership_model.joblib
 
 # Exponer puerto
 EXPOSE 8000
 
 # Variables de entorno
-ENV PYTHONPATH=/app \
-    DATA_PATH=/app/data/models/membership_groceries_userprofile.csv
+ENV PYTHONPATH=/app
 
-# Etapa de producción (aquí podrías entrenar el modelo si es necesario)
+# Etapa de producción
 FROM development AS production
 
-# Comando para iniciar la API
 CMD ["uvicorn", "app.models.main:app", "--host", "0.0.0.0", "--port", "8000"]
+

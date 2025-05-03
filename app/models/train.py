@@ -99,10 +99,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Entrenamiento de modelo para predicción de membresías")
-    parser.add_argument("--data-path", type=str, required=True,
-                        help="Ruta al archivo CSV de datos")
-    parser.add_argument("--output-path", type=str, required=True,
-                        help="Ruta donde guardar el modelo entrenado")
+    parser.add_argument("--data-path", type=str, required=True, help="Ruta al archivo CSV de datos")
+    parser.add_argument("--output-path", type=str, required=True, help="Ruta donde guardar el modelo entrenado")
     args = parser.parse_args()
 
     train_model(args.data_path, args.output_path)
+

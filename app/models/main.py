@@ -5,18 +5,16 @@ import joblib
 import os
 import pandas as pd
 from app.models.schemas import MembershipPredictorFeatures, PredictionResponse
-from app.models.train import train_model  # Ajusta la ruta según tu estructura
+
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA_PATH = os.path.join(ROOT_DIR, "data", "membership_groceries_userprofile.csv")
 MODEL_OUTPUT_PATH = os.path.join(ROOT_DIR, "app", "models", "grocery_membership_model.joblib")
 
-model = train_model(DATA_PATH, MODEL_OUTPUT_PATH)
-
 app = FastAPI(title="API de Predicción de Membresías de Supermercado")
 
 model_path = os.getenv("MODEL_PATH")
-model_path = os.path.join(os.path.dirname(__file__), "..", "..", "models", "membership_model.joblib")
+model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "models", "grocery_membership_model.joblib"))
 model = joblib.load(model_path)
 
 API_KEY_NAME = "X-API-Key"
