@@ -1,4 +1,4 @@
-# trabajo_practica_4
+# proyecto_final_mlops
 ```markdown
 # API de Predicción de Renovación Automática de Membresías de Supermercado
 
