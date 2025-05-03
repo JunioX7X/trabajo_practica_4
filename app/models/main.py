@@ -7,14 +7,9 @@ import pandas as pd
 from app.models.schemas import MembershipPredictorFeatures, PredictionResponse
 from app.models.train import train_model  # Ajusta la ruta según tu estructura
 
-
-
-
-
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))  # Baja solo un nivel, no dos
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA_PATH = os.path.join(ROOT_DIR, "data", "membership_groceries_userprofile.csv")
 MODEL_OUTPUT_PATH = os.path.join(ROOT_DIR, "app", "models", "grocery_membership_model.joblib")
-
 
 model = train_model(DATA_PATH, MODEL_OUTPUT_PATH)
 
