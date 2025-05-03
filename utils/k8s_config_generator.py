@@ -1,6 +1,5 @@
 # utils/k8s_config_generator.py
 from app.models.schemas import ModelDeploymentConfig
-import yaml
 
 
 

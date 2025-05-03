@@ -1,6 +1,5 @@
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, validator, model_validator
-from enum import Enum
 import numpy as np
 import datetime
 
@@ -9,41 +8,6 @@ class FeatureImportance(BaseModel):
     feature_name: str
     importance_score: float
     cumulative_importance: Optional[float] = None
-
-class MembershipPredictorFeatures(BaseModel):
-    """Input schema for membership prediction features."""
-    gender: str
-    shared_account: bool
-    membership_tier: str
-    membership_fee: float
-    push_notification_enabled: bool
-    have_app: bool
-    app_engagement_score: float
-    bought_store_brand: bool
-    promotion_participation_count: int
-    average_basket_size: float
-    use_count: int
-    reward_points_used: float
-    months_active: Optional[int] = None  # si decides calcularlo desde membership_start_date
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "gender": "female",
-                "shared_account": False,
-                "membership_tier": "gold",
-                "membership_fee": 49.99,
-                "push_notification_enabled": True,
-                "have_app": True,
-                "app_engagement_score": 87.5,
-                "bought_store_brand": True,
-                "promotion_participation_count": 5,
-                "average_basket_size": 72.4,
-                "use_count": 35,
-                "reward_points_used": 1200.0,
-                "months_active": 18
-            }
-        }
 
 class MembershipPredictorFeatures(BaseModel):
     """Input schema for membership prediction features."""
