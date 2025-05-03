@@ -10,7 +10,6 @@ class FeatureImportance(BaseModel):
     importance_score: float
     cumulative_importance: Optional[float] = None
 
-
 class MembershipPredictorFeatures(BaseModel):
     """Input schema for membership prediction features."""
     gender: str
@@ -46,7 +45,6 @@ class MembershipPredictorFeatures(BaseModel):
             }
         }
 
-
 class MembershipPredictorFeatures(BaseModel):
     """Input schema for membership prediction features."""
 
@@ -80,11 +78,6 @@ class MembershipPredictorFeatures(BaseModel):
                 "reward_points_used": 200.0
             }
         }
-
-
-from pydantic import BaseModel, Field, validator, model_validator
-import datetime
-import numpy as np
 
 class PredictionResponse(BaseModel):
     """Response schema for membership renewal prediction."""
@@ -120,7 +113,6 @@ class PredictionResponse(BaseModel):
             }
         }
 
-
 class BatchPredictionRequest(BaseModel):
     """Schema for batch prediction requests."""
     features: List[MembershipPredictorFeatures]
@@ -131,7 +123,6 @@ class BatchPredictionRequest(BaseModel):
         if len(v) > 1000:
             raise ValueError("Batch size exceeds maximum limit of 1000 records")
         return v
-
 
 class BatchPredictionResponse(BaseModel):
     """Schema for batch prediction responses."""
@@ -146,7 +137,6 @@ class BatchPredictionResponse(BaseModel):
         if 'predictions' in values and len(values['predictions']) != v:
             raise ValueError("Records processed count mismatch")
         return v
-
 
 class ModelDeploymentConfig(BaseModel):
     """Schema for model deployment configuration."""
@@ -173,7 +163,6 @@ class ModelDeploymentConfig(BaseModel):
                 "monitoring_enabled": True
             }
         }
-
 
 class PredictionMonitoringEvent(BaseModel):
     """Schema for prediction monitoring events."""

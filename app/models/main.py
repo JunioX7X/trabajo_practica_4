@@ -27,7 +27,7 @@ async def get_api_key(api_key: str = Depends(api_key_header)):
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(features: MembershipPredictorFeatures, api_key: str = Depends(get_api_key)):
-#    try:
+    try:
         input_df = pd.DataFrame([features.dict()])
         proba = model.predict_proba(input_df)[0]
         prediction = int(proba[1] >= 0.5)  # o model.predict(input_df)[0]
@@ -40,5 +40,5 @@ async def predict(features: MembershipPredictorFeatures, api_key: str = Depends(
             prediction_id=f"pred_{uuid.uuid4().hex[:8]}",
             prediction_timestamp=datetime.now()
         )
-#    except Exception as e:
- #       raise HTTPException(status_code=500, detail=f"Error al realizar la predicción: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al realizar la predicción: {str(e)}")

@@ -88,4 +88,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     train_model(args.data_path, args.output_path)
-
