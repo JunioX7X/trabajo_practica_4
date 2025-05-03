@@ -8,8 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar código de la app (incluyendo scripts de entrenamiento)
-COPY app ./app
-COPY data ./data
+COPY . .
 
 # Crear directorio para modelos (si es necesario)
 RUN mkdir -p models
