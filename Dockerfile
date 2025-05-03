@@ -7,9 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar código de la app y datos
-COPY app ./app
-COPY data ./data
+COPY . .
 
 # Crear directorio para modelos
 RUN mkdir -p models

@@ -10,84 +10,78 @@ class FeatureImportance(BaseModel):
     importance_score: float
     cumulative_importance: Optional[float] = None
 
-
-class ModelMetadata(BaseModel):
-    """Schema for model versioning and lineage tracking."""
-    model_id: str = Field(..., description="Unique identifier for the model version")
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.now)
-    training_dataset: str = Field(..., description="Path or identifier of training dataset")
-    model_type: str
-    framework_version: str
-    accuracy: float = Field(..., ge=0.0, le=1.0)
-    f1_score: Optional[float] = Field(None, ge=0.0, le=1.0)
-    feature_importance: Optional[List[FeatureImportance]] = None
-    hyperparameters: Dict[str, Any]
+class MembershipPredictorFeatures(BaseModel):
+    """Input schema for membership prediction features."""
+    gender: str
+    shared_account: bool
+    membership_tier: str
+    membership_fee: float
+    push_notification_enabled: bool
+    have_app: bool
+    app_engagement_score: float
+    bought_store_brand: bool
+    promotion_participation_count: int
+    average_basket_size: float
+    use_count: int
+    reward_points_used: float
+    months_active: Optional[int] = None  # si decides calcularlo desde membership_start_date
 
     class Config:
         json_schema_extra = {
             "example": {
-                "model_id": "model_20240418_a1b2c3",
-                "created_at": "2024-04-18T10:30:00Z",
-                "training_dataset": "membership_groceries_userprofile.csv",
-                "model_type": "RandomForestClassifier",
-                "framework_version": "scikit-learn 1.3.0",
-                "accuracy": 0.92,
-                "f1_score": 0.89,
-                "feature_importance": [
-                    {"feature_name": "purchase_frequency", "importance_score": 0.23, "cumulative_importance": 0.23},
-                    {"feature_name": "total_spend", "importance_score": 0.18, "cumulative_importance": 0.41}
-                ],
-                "hyperparameters": {"n_estimators": 100, "max_depth": 10}
+                "gender": "female",
+                "shared_account": False,
+                "membership_tier": "gold",
+                "membership_fee": 49.99,
+                "push_notification_enabled": True,
+                "have_app": True,
+                "app_engagement_score": 87.5,
+                "bought_store_brand": True,
+                "promotion_participation_count": 5,
+                "average_basket_size": 72.4,
+                "use_count": 35,
+                "reward_points_used": 1200.0,
+                "months_active": 18
             }
         }
-
 
 class MembershipPredictorFeatures(BaseModel):
     """Input schema for membership prediction features."""
-    age: int = Field(..., ge=18, le=100, description="Customer age")
-    income: float = Field(..., ge=0, description="Annual income in USD")
-    shopping_frequency: int = Field(..., ge=0, description="Number of shopping trips per month")
-    avg_basket_value: float = Field(..., ge=0, description="Average transaction value in USD")
-    months_active: int = Field(..., ge=1, description="Number of months as active customer")
-    previous_renewals: int = Field(..., ge=0, description="Count of previous membership renewals")
-    product_categories_purchased: int = Field(..., ge=0, description="Number of unique product categories")
-    has_returned_items: bool = Field(..., description="Whether customer has returned items")
-    distance_to_store: float = Field(..., ge=0, description="Distance to nearest store in km")
 
-    @validator('avg_basket_value')
-    def validate_basket_value(cls, v):
-        if v > 10000:
-            raise ValueError("Unusually high basket value detected")
-        return v
-
-    @model_validator(mode="after")
-    def validate_activity_metrics(cls, values):
-        if values.months_active > 0 and values.shopping_frequency == 0:
-            raise ValueError("Invalid activity pattern: active months with zero shopping frequency")
-        return values
+    gender: str = Field(..., description="Customer gender, e.g., 'male', 'female', or 'other'")
+    shared_account: bool = Field(..., description="Indicates if the account is shared")
+    membership_tier: str = Field(..., description="Membership level: 'silver', 'gold', or 'platinum'")
+    membership_fee: float = Field(..., ge=0, description="Monthly membership fee in USD")
+    push_notification_enabled: bool = Field(..., description="True if push notifications are enabled")
+    have_app: bool = Field(..., description="True if the customer has the store app installed")
+    app_engagement_score: float = Field(..., ge=0, le=100, description="Engagement score with the app (0-100)")
+    bought_store_brand: bool = Field(..., description="True if customer buys the store’s brand")
+    promotion_participation_count: int = Field(..., ge=0, description="Number of promotions the customer participated in")
+    average_basket_size: float = Field(..., ge=0, description="Average number of items per shopping trip")
+    use_count: int = Field(..., ge=0, description="Total number of times the customer used the membership")
+    reward_points_used: float = Field(..., ge=0, description="Total reward points redeemed")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "age": 35,
-                "income": 65000.0,
-                "shopping_frequency": 8,
-                "avg_basket_value": 120.5,
-                "months_active": 24,
-                "previous_renewals": 2,
-                "product_categories_purchased": 12,
-                "has_returned_items": False,
-                "distance_to_store": 5.3
+                "gender": "male",
+                "shared_account": True,
+                "membership_tier": "silver",
+                "membership_fee": 29.99,
+                "push_notification_enabled": True,
+                "have_app": True,
+                "app_engagement_score": 65.5,
+                "bought_store_brand": False,
+                "promotion_participation_count": 3,
+                "average_basket_size": 55.2,
+                "use_count": 18,
+                "reward_points_used": 200.0
             }
         }
 
-
-from pydantic import BaseModel, Field, validator, model_validator
-import numpy as np
-import datetime
-
 class PredictionResponse(BaseModel):
-    auto_renew_prediction: bool = Field(..., description="Binary prediction: 1=renewal, 0=no renewal")
+    """Response schema for membership renewal prediction."""
+    auto_renew_prediction: int = Field(..., description="Binary prediction: 1=renewal, 0=no renewal")
     probability_yes: float = Field(..., ge=0.0, le=1.0, description="Probability of renewal")
     probability_no: float = Field(..., ge=0.0, le=1.0, description="Probability of non-renewal")
     model_version: str = Field(..., description="Version ID of model used for prediction")
@@ -96,12 +90,13 @@ class PredictionResponse(BaseModel):
 
     @validator('probability_yes', 'probability_no')
     def validate_probabilities(cls, v):
-        return round(float(v), 4)
+        return round(float(v), 4)  # Ensure consistent decimal precision
 
+    @classmethod
     @model_validator(mode="after")
     def validate_probability_sum(cls, values):
-        p_yes = getattr(values, 'probability_yes', 0)
-        p_no = getattr(values, 'probability_no', 0)
+        p_yes = values.probability_yes
+        p_no = values.probability_no
         if not np.isclose(p_yes + p_no, 1.0, atol=1e-5):
             raise ValueError("Probabilities must sum to 1.0")
         return values
@@ -118,8 +113,6 @@ class PredictionResponse(BaseModel):
             }
         }
 
-
-
 class BatchPredictionRequest(BaseModel):
     """Schema for batch prediction requests."""
     features: List[MembershipPredictorFeatures]
@@ -130,7 +123,6 @@ class BatchPredictionRequest(BaseModel):
         if len(v) > 1000:
             raise ValueError("Batch size exceeds maximum limit of 1000 records")
         return v
-
 
 class BatchPredictionResponse(BaseModel):
     """Schema for batch prediction responses."""
@@ -145,7 +137,6 @@ class BatchPredictionResponse(BaseModel):
         if 'predictions' in values and len(values['predictions']) != v:
             raise ValueError("Records processed count mismatch")
         return v
-
 
 class ModelDeploymentConfig(BaseModel):
     """Schema for model deployment configuration."""
@@ -172,7 +163,6 @@ class ModelDeploymentConfig(BaseModel):
                 "monitoring_enabled": True
             }
         }
-
 
 class PredictionMonitoringEvent(BaseModel):
     """Schema for prediction monitoring events."""
